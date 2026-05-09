@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💰 Мій Бюджет</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090f;
+    --surface: #0f1117;
+    --card: #141720;
+    --border: #1e2130;
+    --accent: #f5c842;
+    --green: #3de88a;
+    --red: #ff5c5c;
+    --blue: #5ca8ff;
+    --purple: #b47fff;
+    --text: #e8e6e0;
+    --muted: #5a6070;
+    --faint: #1e2130;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+  h1, h2, h3, .label { font-family: 'Unbounded', sans-serif; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(160deg, #0f1117 0%, #0a0d14 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 20px 18px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .flag { font-size: 20px; }
+  .app-title { font-family: 'Unbounded', sans-serif; font-size: 18px; font-weight: 900; color: var(--accent); letter-spacing: -0.5px; }
+  .app-sub { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+  /* TABS */
+  nav {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  nav button {
+    flex: 1; padding: 13px 6px; background: none; border: none;
+    color: var(--muted); font-family: 'Manrope', sans-serif; font-size: 13px;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* TABS CONTENT */
+  .tab { display: none; padding: 20px 16px; max-width: 520px; margin: 0 auto; }
+  .tab.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card-label {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px;
+  }
+
+  /* SUMMARY GRID */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .summary-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 10px; text-align: center;
+  }
+  .summary-item .s-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .summary-item .s-val { font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 700; }
+
+  /* MONTH PILLS */
+  .month-bar { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; }
+  .month-pill {
+    padding: 5px 10px; border-radius: 20px; border: none; cursor: pointer;
+    font-family: 'Manrope', sans-serif; font-size: 11px;
+    background: var(--faint); color: var(--muted); transition: all 0.15s;
+  }
+  .month-pill.active { background: var(--accent); color: #000; font-weight: 700; }
+
+  /* FORM */
+  .form-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .type-btn {
+    flex: 1; padding: 9px; border-radius: 10px; border: none; cursor: pointer;
+    font-family: 'Manrope', sans-serif; font-size: 13px;
+    background: var(--faint); color: var(--muted); transition: all 0.2s;
+  }
+  .type-btn.income.active { background: #0a2418; color: var(--green); }
+  .type-btn.expense.active { background: #200f0f; color: var(--red); }
+  input, select {
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    background: #0a0c12; color: var(--text);
+    border: 1px solid var(--border); font-family: 'Manrope', sans-serif;
+    font-size: 13px; outline: none; transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%; padding: 13px; border-radius: 12px; border: none;
+    background: var(--accent); color: #000;
+    font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost {
+    width: 100%; padding: 12px; border-radius: 10px;
+    background: none; border: 1px dashed var(--border);
+    color: var(--muted); font-family: 'Manrope', sans-serif; font-size: 14px;
+    cursor: pointer; margin-bottom: 16px; transition: border-color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* TRANSACTION LIST */
+  .tx-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .tx-cat { flex: 1; }
+  .tx-cat .main { font-size: 14px; }
+  .tx-cat .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .tx-amt { font-family: 'Unbounded', sans-serif; font-size: 14px; font-weight: 700; }
+  .tx-del { background: none; border: none; color: var(--faint); cursor: pointer; font-size: 16px; padding: 0 4px; transition: color 0.2s; }
+  .tx-del:hover { color: var(--red); }
+
+  /* PROGRESS BAR */
+  .prog-wrap { margin-bottom: 14px; }
+  .prog-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .prog-track { height: 7px; border-radius: 4px; background: var(--faint); overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+
+  /* DEBT ROWS */
+  .debt-block {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin-bottom: 12px;
+  }
+  .debt-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .debt-num { font-family: 'Unbounded', sans-serif; font-size: 10px; color: var(--accent); letter-spacing: 2px; }
+  .debt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .debt-field label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+  /* SNOWBALL */
+  .snowball-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--faint); }
+  .snowball-item:last-child { border-bottom: none; }
+  .snow-num {
+    width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-family: 'Unbounded', sans-serif; font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .snow-num.first { background: var(--accent); color: #000; }
+  .snow-num.rest { background: var(--faint); color: var(--muted); }
+  .snow-info { flex: 1; }
+  .snow-info .name { font-size: 14px; }
+  .snow-info .hint { font-size: 11px; color: var(--accent); margin-top: 2px; }
+  .snow-amt { font-family: 'Unbounded', sans-serif; font-size: 14px; color: var(--red); }
+  .snow-pct { font-size: 11px; color: var(--muted); }
+
+  /* RECOMMENDATION CARD */
+  .rec-card {
+    background: linear-gradient(135deg, #111620 0%, #0d1219 100%);
+    border: 1px solid #2a3050;
+    border-radius: 16px; padding: 20px; margin-bottom: 14px;
+  }
+  .rec-title {
+    font-family: 'Unbounded', sans-serif; font-size: 10px;
+    letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;
+  }
+  .rec-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid #1a2030;
+  }
+  .rec-row:last-child { border-bottom: none; }
+  .rec-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .rec-body { flex: 1; }
+  .rec-category { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .rec-amount { font-family: 'Unbounded', sans-serif; font-size: 17px; font-weight: 700; }
+  .rec-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .rec-pct { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .status-ok { color: var(--green); }
+  .status-warn { color: var(--accent); }
+  .status-bad { color: var(--red); }
+
+  .empty { color: var(--faint); text-align: center; padding: 36px 0; font-size: 14px; line-height: 1.8; }
+
+  /* TOTAL DEBT BIG */
+  .big-num {
+    font-family: 'Unbounded', sans-serif; font-size: 30px; font-weight: 900;
+    color: var(--red); text-align: center; padding: 8px 0 4px;
+  }
+
+  @media (max-width: 400px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .debt-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span class="flag">🇺🇦</span>
+    <div>
+      <div class="app-title">Мій Бюджет</div>
+      <div class="app-sub">Особисті фінанси · ₴ гривня</div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('budget')">💰 Бюджет</button>
+  <button onclick="switchTab('debts')">📋 Борги</button>
+  <button onclick="switchTab('stats')">📊 Аналіз</button>
+  <button onclick="switchTab('plan')">🎯 План</button>
+</nav>
+
+<!-- BUDGET TAB -->
+<div id="tab-budget" class="tab active">
+  <div class="month-bar" id="monthBar"></div>
+
+  <div class="summary-grid">
+    <div class="summary-item">
+      <div class="s-label">Доходи</div>
+      <div class="s-val status-ok" id="s-income">0 ₴</div>
+    </div>
+    <div class="summary-item">
+      <div class="s-label">Витрати</div>
+      <div class="s-val status-bad" id="s-expense">0 ₴</div>
+    </div>
+    <div class="summary-item">
+      <div class="s-label">Баланс</div>
+      <div class="s-val" id="s-balance">0 ₴</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Додати запис</div>
+    <div class="form-row">
+      <button class="type-btn expense active" id="btn-expense" onclick="setType('expense')">➖ Витрата</button>
+      <button class="type-btn income" id="btn-income" onclick="setType('income')">➕ Дохід</button>
+    </div>
+    <div class="form-row">
+      <select id="f-category" style="flex:1"></select>
+    </div>
+    <div class="form-row">
+      <input id="f-amount" type="number" placeholder="Сума ₴" style="flex:1">
+      <input id="f-date" type="date" style="flex:1">
+    </div>
+    <div class="form-row">
+      <input id="f-note" type="text" placeholder="Нотатка (необов'язково)">
+    </div>
+    <button class="btn-primary" onclick="addTransaction()">Додати</button>
+  </div>
+
+  <div class="card-label" style="margin-left:2px">Історія</div>
+  <div id="tx-list"></div>
+</div>
+
+<!-- DEBTS TAB -->
+<div id="tab-debts" class="tab">
+  <div class="card" style="text-align:center">
+    <div class="card-label">Загальний борг</div>
+    <div class="big-num" id="total-debt">0 ₴</div>
+    <div style="font-size:11px; color:var(--muted); margin-top:4px" id="debt-months-hint"></div>
+  </div>
+
+  <div id="debt-list"></div>
+  <button class="btn-ghost" onclick="addDebt()">+ Додати борг</button>
+
+  <div class="card" id="snowball-card" style="display:none">
+    <div class="card-label">❄️ Сніжний ком — порядок погашення</div>
+    <div id="snowball-list"></div>
+  </div>
+</div>
+
+<!-- STATS TAB -->
+<div id="tab-stats" class="tab">
+  <div class="month-bar" id="monthBar2"></div>
+
+  <div class="card" id="rule-card" style="display:none">
+    <div class="card-label">Правило 50 / 30 / 20</div>
+    <div id="rule-bars"></div>
+  </div>
+
+  <div class="card" id="cat-card">
+    <div class="card-label">Витрати за категоріями</div>
+    <div id="cat-bars"></div>
+  </div>
+</div>
+
+<!-- PLAN TAB -->
+<div id="tab-plan" class="tab">
+  <div class="card" style="background: linear-gradient(135deg,#0f1420,#0a0e18); border-color:#252d45">
+    <div class="card-label" style="color:var(--accent)">Як це працює</div>
+    <div style="font-size:13px; color:var(--muted); line-height:1.7">
+      Трекер аналізує твої <b style="color:var(--text)">доходи</b>, <b style="color:var(--text)">витрати</b> та <b style="color:var(--text)">борги</b> поточного місяця і дає конкретні цифри — скільки гривень виділити на кожну категорію.
+    </div>
+  </div>
+
+  <div id="rec-content">
+    <div class="empty">Додай доходи у вкладці «Бюджет»,<br>щоб отримати персональний план 💡</div>
+  </div>
+</div>
+
+<script>
+const MONTHS = ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+const CATS = {
+  expense: ['Їжа','Житло','Транспорт','Борги','Комуналка','Розваги','Одяг','Здоров\'я','Інше'],
+  income:  ['Зарплата','Підробіток','Фріланс','Інше']
+};
+const COLORS = ['#f5c842','#3de88a','#5ca8ff','#ff5c5c','#b47fff','#ff9f5c','#5cf5e8','#ff7eb3'];
+
+// STATE
+let currentType = 'expense';
+let currentMonth = new Date().getMonth();
+let transactions = JSON.parse(localStorage.getItem('ua_tx') || '[]');
+let debts = JSON.parse(localStorage.getItem('ua_debts') || '[]');
+if (!debts.length) debts = [newDebt()];
+
+function save() {
+  localStorage.setItem('ua_tx', JSON.stringify(transactions));
+  localStorage.setItem('ua_debts', JSON.stringify(debts));
+}
+
+function newDebt() {
+  return { id: Date.now() + Math.random(), name: '', amount: '', percent: '', minPayment: '' };
+}
+
+// INIT
+document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+buildMonthBars();
+setType('expense');
+renderAll();
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  renderAll();
+}
+
+function buildMonthBars() {
+  ['monthBar','monthBar2'].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    MONTHS.forEach((m, i) => {
+      const b = document.createElement('button');
+      b.className = 'month-pill' + (i === currentMonth ? ' active' : '');
+      b.textContent = m;
+      b.onclick = () => { currentMonth = i; buildMonthBars(); renderAll(); };
+      el.appendChild(b);
+    });
+  });
+}
+
+function setType(type) {
+  currentType = type;
+  document.getElementById('btn-expense').className = 'type-btn expense' + (type==='expense'?' active':'');
+  document.getElementById('btn-income').className  = 'type-btn income'  + (type==='income' ?' active':'');
+  const sel = document.getElementById('f-category');
+  sel.innerHTML = CATS[type].map(c => `<option>${c}</option>`).join('');
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('uk-UA'); }
+
+function addTransaction() {
+  const amt = parseFloat(document.getElementById('f-amount').value);
+  if (!amt || isNaN(amt)) return;
+  transactions.push({
+    id: Date.now(),
+    type: currentType,
+    category: document.getElementById('f-category').value,
+    amount: amt,
+    note: document.getElementById('f-note').value,
+    date: document.getElementById('f-date').value
+  });
+  save();
+  document.getElementById('f-amount').value = '';
+  document.getElementById('f-note').value = '';
+  renderAll();
+}
+
+function removeTransaction(id) {
+  transactions = transactions.filter(t => t.id !== id);
+  save(); renderAll();
+}
+
+function addDebt() {
+  debts.push(newDebt());
+  save(); renderDebts();
+}
+
+function removeDebt(id) {
+  debts = debts.filter(d => d.id !== id);
+  if (!debts.length) debts.push(newDebt());
+  save(); renderDebts();
+}
+
+function updateDebt(id, field, value) {
+  debts = debts.map(d => d.id === id ? { ...d, [field]: value } : d);
+  save(); renderDebtSummary();
+}
+
+// ===================== RENDER =====================
+function renderAll() {
+  const filtered = transactions.filter(t => new Date(t.date).getMonth() === currentMonth);
+  const income  = filtered.filter(t => t.type==='income').reduce((s,t) => s+t.amount, 0);
+  const expense = filtered.filter(t => t.type==='expense').reduce((s,t) => s+t.amount, 0);
+  const balance = income - expense;
+
+  // Summary
+  document.getElementById('s-income').textContent  = fmt(income)  + ' ₴';
+  document.getElementById('s-expense').textContent = fmt(expense) + ' ₴';
+  const balEl = document.getElementById('s-balance');
+  balEl.textContent = fmt(balance) + ' ₴';
+  balEl.className = 's-val ' + (balance >= 0 ? 'status-ok' : 'status-bad');
+
+  // Transaction list
+  const txList = document.getElementById('tx-list');
+  const rev = [...filtered].reverse();
+  if (!rev.length) {
+    txList.innerHTML = '<div class="empty">Немає записів за цей місяць</div>';
+  } else {
+    txList.innerHTML = rev.map(t => `
+      <div class="tx-item">
+        <div class="tx-cat">
+          <div class="main">${t.category}${t.note ? ` <span style="color:var(--muted);font-size:12px">· ${t.note}</span>` : ''}</div>
+          <div class="sub">${t.date}</div>
+        </div>
+        <div class="tx-amt" style="color:${t.type==='income'?'var(--green)':'var(--red)'}">${t.type==='income'?'+':'-'}${fmt(t.amount)} ₴</div>
+        <button class="tx-del" onclick="removeTransaction(${t.id})">✕</button>
+      </div>`).join('');
+  }
+
+  // Stats
+  renderStats(filtered, income, expense);
+  renderDebts();
+  renderPlan(income, expense);
+}
+
+function renderStats(filtered, income, expense) {
+  // Rule card
+  const ruleCard = document.getElementById('rule-card');
+  if (income > 0) {
+    ruleCard.style.display = 'block';
+    const bars = [
+      { label: 'Потреби', pct: 50, color: 'var(--blue)' },
+      { label: 'Бажання', pct: 30, color: 'var(--purple)' },
+      { label: 'Борги / заощадження', pct: 20, color: 'var(--green)' },
+    ];
+    document.getElementById('rule-bars').innerHTML = bars.map(b => `
+      <div class="prog-wrap">
+        <div class="prog-head">
+          <span>${b.label} (${b.pct}%)</span>
+          <span style="color:${b.color};font-weight:600">${fmt(income * b.pct / 100)} ₴</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:100%;background:${b.color}"></div></div>
+      </div>`).join('');
+  } else { ruleCard.style.display = 'none'; }
+
+  // Category bars
+  const bycat = {};
+  filtered.filter(t => t.type==='expense').forEach(t => { bycat[t.category] = (bycat[t.category]||0) + t.amount; });
+  const sorted = Object.entries(bycat).sort((a,b) => b[1]-a[1]);
+  const catDiv = document.getElementById('cat-bars');
+  if (!sorted.length) {
+    catDiv.innerHTML = '<div class="empty" style="padding:20px 0">Немає витрат за цей місяць</div>';
+  } else {
+    catDiv.innerHTML = sorted.map(([cat, amt], i) => {
+      const pct = expense > 0 ? (amt/expense)*100 : 0;
+      return `<div class="prog-wrap">
+        <div class="prog-head">
+          <span>${cat}</span>
+          <span style="color:${COLORS[i%COLORS.length]};font-weight:600">${fmt(amt)} ₴ <span style="color:var(--muted);font-size:11px">(${Math.round(pct)}%)</span></span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${COLORS[i%COLORS.length]}"></div></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderDebts() {
+  renderDebtList();
+  renderDebtSummary();
+}
+
+function renderDebtList() {
+  document.getElementById('debt-list').innerHTML = debts.map((d, i) => `
+    <div class="debt-block">
+      <div class="debt-head">
+        <div class="debt-num">БОРГ #${i+1}</div>
+        <button class="tx-del" onclick="removeDebt(${d.id})">✕</button>
+      </div>
+      <input placeholder="Кому (банк, друг...)" value="${d.name}" oninput="updateDebt(${d.id},'name',this.value)" style="margin-bottom:8px">
+      <div class="debt-grid">
+        <div class="debt-field"><label>СУМА ₴</label><input type="number" placeholder="0" value="${d.amount}" oninput="updateDebt(${d.id},'amount',this.value)"></div>
+        <div class="debt-field"><label>% СТАВКА</label><input type="number" placeholder="0" value="${d.percent}" oninput="updateDebt(${d.id},'percent',this.value)"></div>
+        <div class="debt-field"><label>МІН. ПЛАТІЖ</label><input type="number" placeholder="0" value="${d.minPayment}" oninput="updateDebt(${d.id},'minPayment',this.value)"></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderDebtSummary() {
+  const total = debts.reduce((s,d) => s+(parseFloat(d.amount)||0), 0);
+  document.getElementById('total-debt').textContent = fmt(total) + ' ₴';
+
+  const totalMin = debts.reduce((s,d) => s+(parseFloat(d.minPayment)||0), 0);
+  const hintEl = document.getElementById('debt-months-hint');
+  hintEl.textContent = totalMin > 0 ? `Мінімальні платежі: ${fmt(totalMin)} ₴/міс` : '';
+
+  const sorted = debts.filter(d=>d.amount).sort((a,b)=>parseFloat(a.amount)-parseFloat(b.amount));
+  const sc = document.getElementById('snowball-card');
+  if (sorted.length > 0) {
+    sc.style.display = 'block';
+    document.getElementById('snowball-list').innerHTML = sorted.map((d,i) => `
+      <div class="snowball-item">
+        <div class="snow-num ${i===0?'first':'rest'}">${i+1}</div>
+        <div class="snow-info">
+          <div class="name">${d.name||'Без назви'}</div>
+          ${i===0?'<div class="hint">← Спочатку цей!</div>':''}
+        </div>
+        <div style="text-align:right">
+          <div class="snow-amt">${fmt(parseFloat(d.amount))} ₴</div>
+          ${d.percent?`<div class="snow-pct">${d.percent}%</div>`:''}
+        </div>
+      </div>`).join('');
+  } else { sc.style.display = 'none'; }
+}
+
+function renderPlan(income, expense) {
+  const cont = document.getElementById('rec-content');
+  if (income <= 0) {
+    cont.innerHTML = '<div class="empty">Додай доходи у вкладці «Бюджет»,<br>щоб отримати персональний план 💡</div>';
+    return;
+  }
+
+  const totalDebt = debts.reduce((s,d) => s+(parseFloat(d.amount)||0), 0);
+  const totalMin  = debts.reduce((s,d) => s+(parseFloat(d.minPayment)||0), 0);
+
+  // Smart allocation logic
+  const debtRatio = totalDebt / income; // how many months of income is debt
+  let debtAlloc, savingsAlloc, needsAlloc, wantsAlloc;
+
+  if (debtRatio > 6) {
+    // Heavy debt — aggressive payoff
+    debtAlloc    = Math.max(totalMin, income * 0.35);
+    savingsAlloc = income * 0.05;
+    needsAlloc   = income * 0.50;
+    wantsAlloc   = income - debtAlloc - savingsAlloc - needsAlloc;
+    if (wantsAlloc < 0) { wantsAlloc = 0; needsAlloc = income - debtAlloc - savingsAlloc; }
+  } else if (debtRatio > 2) {
+    // Moderate debt
+    debtAlloc    = Math.max(totalMin, income * 0.25);
+    savingsAlloc = income * 0.10;
+    needsAlloc   = income * 0.50;
+    wantsAlloc   = income - debtAlloc - savingsAlloc - needsAlloc;
+    if (wantsAlloc < 0) { wantsAlloc = 0; needsAlloc = income - debtAlloc - savingsAlloc; }
+  } else if (totalDebt > 0) {
+    // Small debt
+    debtAlloc    = Math.max(totalMin, income * 0.15);
+    savingsAlloc = income * 0.15;
+    needsAlloc   = income * 0.50;
+    wantsAlloc   = income - debtAlloc - savingsAlloc - needsAlloc;
+  } else {
+    // No debt — classic 50/30/20
+    debtAlloc    = 0;
+    savingsAlloc = income * 0.20;
+    needsAlloc   = income * 0.55;
+    wantsAlloc   = income * 0.25;
+  }
+
+  const free = income - expense;
+  const freeColor = free >= 0 ? 'var(--green)' : 'var(--red)';
+  const freeStatus = free >= 0 ? '✅' : '⚠️';
+
+  // Overspend warning
+  const needsSpent = expense; // simplified
+  const needsStatus = needsSpent <= needsAlloc ? 'status-ok' : 'status-bad';
+
+  const rows = [];
+
+  rows.push({ icon:'🏠', cat:'Базові потреби', amt: needsAlloc, desc:`Їжа, житло, транспорт, комуналка — все необхідне`, pct: Math.round(needsAlloc/income*100) });
+  if (wantsAlloc > 100) rows.push({ icon:'🎉', cat:'Бажання / розваги', amt: wantsAlloc, desc:`Кафе, розваги, одяг — на задоволення`, pct: Math.round(wantsAlloc/income*100) });
+  if (debtAlloc > 0) rows.push({ icon:'💳', cat:'Погашення боргів', amt: debtAlloc, desc: totalMin > 0 ? `Мінімум ${fmt(totalMin)} ₴, рекомендовано більше` : `Кидай все на найменший борг`, pct: Math.round(debtAlloc/income*100) });
+  rows.push({ icon:'🏦', cat:'Заощадження / подушка', amt: savingsAlloc, desc:`Резервний фонд — хоча б 3 місяці витрат`, pct: Math.round(savingsAlloc/income*100) });
+
+  let statusMsg = '';
+  let statusClass = '';
+  if (debtRatio > 6) {
+    statusMsg = '🔴 Борги критичні — фокус на їх погашенні. Скороти розваги до мінімуму.';
+    statusClass = 'status-bad';
+  } else if (debtRatio > 2) {
+    statusMsg = '🟡 Борги помітні — підвищений темп погашення допоможе за 12–18 місяців.';
+    statusClass = 'status-warn';
+  } else if (totalDebt > 0) {
+    statusMsg = '🟢 Борги невеликі — стандартний план закриє їх швидко.';
+    statusClass = 'status-ok';
+  } else {
+    statusMsg = '🟢 Боргів немає — будуй подушку і починай інвестувати!';
+    statusClass = 'status-ok';
+  }
+
+  cont.innerHTML = `
+    <div class="card" style="background:var(--faint);border-color:#2a3050;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">💵 Дохід цього місяця</div>
+      <div style="font-family:'Unbounded',sans-serif;font-size:22px;font-weight:900;color:var(--green)">${fmt(income)} ₴</div>
+      ${totalDebt > 0 ? `<div style="font-size:12px;color:var(--muted);margin-top:6px">📋 Загальний борг: <b style="color:var(--red)">${fmt(totalDebt)} ₴</b></div>` : ''}
+      <div style="font-size:12px;margin-top:8px" class="${statusClass}">${statusMsg}</div>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-title">🎯 Рекомендований розподіл</div>
+      ${rows.map(r => `
+        <div class="rec-row">
+          <div class="rec-icon">${r.icon}</div>
+          <div class="rec-body">
+            <div class="rec-category">${r.cat}</div>
+            <div class="rec-amount" style="color:var(--accent)">${fmt(r.amt)} ₴</div>
+            <div class="rec-desc">${r.desc}</div>
+            <div class="rec-pct">${r.pct}% від доходу</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-label">Реальний стан цього місяця</div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--faint)">
+        <span style="color:var(--muted)">Дохід</span>
+        <span style="font-weight:600;color:var(--green)">${fmt(income)} ₴</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--faint)">
+        <span style="color:var(--muted)">Витрачено</span>
+        <span style="font-weight:600;color:var(--red)">${fmt(expense)} ₴</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0">
+        <span style="color:var(--muted)">${freeStatus} Залишок</span>
+        <span style="font-weight:700;font-family:'Unbounded',sans-serif;font-size:15px;color:${freeColor}">${fmt(free)} ₴</span>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);text-align:center;line-height:1.7;padding:0 8px 10px">
+      Рекомендації базуються на твоїх реальних даних.<br>Оновлюються автоматично при зміні бюджету.
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
